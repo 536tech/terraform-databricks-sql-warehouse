@@ -1,0 +1,15 @@
+formatter: markdown document
+
+sections:
+  hide:
+    - modules
+
+output:
+  file: README.md
+  mode: inject
+
+settings:
+  anchor: false
+  hide-empty: true
+  html: false
+  lockfile: false
