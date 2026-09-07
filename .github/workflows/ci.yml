@@ -1,0 +1,91 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  terraform:
+    name: fmt, validate, tflint, test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Check generated Terraform docs
+        uses: terraform-docs/gh-actions@6de6da0cefcc6b4b7a5cbea4d79d97060733093c # v1.4.1
+        with:
+          config-file: .terraform-docs.yml
+          fail-on-diff: "true"
+          output-format: ""
+          output-method: ""
+          working-dir: .
+
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@dfe3c3f87815947d99a8997f908cb6525fc44e9e # v4.0.1
+        with:
+          terraform_version: 1.16.1
+          terraform_wrapper: false
+
+      - name: Run pre-commit hooks
+        uses: j178/prek-action@4e14d07f9231acabce116ccfca13b13dd9755ece # v3.0.0
+        env:
+          SKIP: terraform_docs
+
+      - name: Set up tflint
+        uses: terraform-linters/setup-tflint@1cf010d3c7aef302051ccdb68c14c5dc2efa34ef # v6.3.1
+        with:
+          tflint_version: v0.64.0
+
+      - name: Create the provider plugin cache
+        run: |
+          set -euo pipefail
+          mkdir -p "${RUNNER_TEMP}/terraform-plugin-cache"
+          echo "TF_PLUGIN_CACHE_DIR=${RUNNER_TEMP}/terraform-plugin-cache" >> "${GITHUB_ENV}"
+
+      - name: Check formatting
+        run: terraform fmt -recursive -check -diff
+
+      - name: Initialize
+        run: terraform init -backend=false -input=false -no-color -lockfile=readonly
+
+      - name: Validate
+        run: terraform validate -no-color
+
+      - name: Lint
+        run: |
+          set -euo pipefail
+          tflint --init
+          tflint --recursive
+
+      - name: Test
+        run: terraform test -no-color
+
+      - name: Test the minimum Databricks provider
+        run: |
+          set -euo pipefail
+          cp .terraform.lock.hcl "${RUNNER_TEMP}/provider.lock.hcl"
+          trap 'mv "${RUNNER_TEMP}/provider.lock.hcl" .terraform.lock.hcl; rm -f minimum_override.tf' EXIT
+          cat > minimum_override.tf <<'EOF'
+          terraform {
+            required_providers {
+              databricks = {
+                source  = "databricks/databricks"
+                version = "= 1.128.0"
+              }
+            }
+          }
+          EOF
+          terraform init -backend=false -input=false -no-color -upgrade
+          terraform test -no-color
