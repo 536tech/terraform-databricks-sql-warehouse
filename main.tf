@@ -3,6 +3,13 @@ locals {
 }
 
 resource "databricks_sql_endpoint" "this" {
+  lifecycle {
+    precondition {
+      condition     = coalesce(var.max_num_clusters, 1) >= coalesce(var.min_num_clusters, 1)
+      error_message = "max_num_clusters must be at least min_num_clusters."
+    }
+  }
+
   name                      = var.name
   cluster_size              = var.cluster_size
   min_num_clusters          = var.min_num_clusters

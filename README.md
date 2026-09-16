@@ -16,7 +16,7 @@ The resource addresses above are part of the DataTF import contract. Do not rena
 ```hcl
 module "warehouse" {
   source  = "536tech/sql-warehouse/databricks"
-  version = "1.0.0"
+  version = "1.0.1"
 
   name                      = "Analytics WH"
   cluster_size              = "Small"
@@ -69,6 +69,18 @@ The workspace pattern module checks the complete DataTF contract and its integra
 ## License
 
 [Apache-2.0](LICENSE).
+
+## Input safeguards
+
+The module rejects blank required names and invalid access inputs during the plan.
+Cross-input preconditions preserve the Terraform 1.5 minimum and existing resource addresses.
+Null remains valid for inputs where the provider supplies a default.
+Provider and API checks still apply. These checks do not prove complete permission visibility.
+
+Each permission needs exactly one nonblank principal and a supported resource-specific permission level.
+`databricks_permissions` manages the object's permission set. Keep one state owner for that set.
+Empty permissions omit the permission resource.
+See [provider permission semantics](https://github.com/databricks/terraform-provider-databricks/blob/v1.130.0/docs/resources/permissions.md).
 
 <!-- BEGIN_TF_DOCS -->
 ## Requirements
