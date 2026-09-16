@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.1 - 2026-09-16
+
+- Validate module inputs and access rules before provider API requests.
+- Reject invalid permissions and conflicting settings without changing resource addresses.
+- Preserve provider defaults for optional values.
+
 ## 1.0.0 - 2026-09-09
 
 - Declare the module contract stable. The inputs, outputs, resource addresses, and provider

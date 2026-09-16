@@ -16,7 +16,7 @@ The resource addresses above are part of the DataTF import contract. Do not rena
 ```hcl
 module "warehouse" {
   source  = "536tech/sql-warehouse/databricks"
-  version = "1.0.0"
+  version = "1.0.1"
 
   name                      = "Analytics WH"
   cluster_size              = "Small"
