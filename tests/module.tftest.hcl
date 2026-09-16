@@ -103,3 +103,15 @@ run "reject_group_owner" {
   }
   expect_failures = [var.permissions]
 }
+
+run "accept_provider_defaults" {
+  command = plan
+  variables {
+    min_num_clusters          = null
+    max_num_clusters          = null
+    auto_stop_mins            = null
+    warehouse_type            = null
+    enable_photon             = null
+    enable_serverless_compute = null
+  }
+}

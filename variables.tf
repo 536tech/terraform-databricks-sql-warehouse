@@ -23,10 +23,9 @@ variable "cluster_size" {
 variable "min_num_clusters" {
   description = "Minimum number of clusters the warehouse runs."
   type        = number
-  nullable    = false
 
   validation {
-    condition     = try(var.min_num_clusters >= 1 && floor(var.min_num_clusters) == var.min_num_clusters, false)
+    condition     = var.min_num_clusters == null ? true : try(var.min_num_clusters >= 1 && floor(var.min_num_clusters) == var.min_num_clusters, false)
     error_message = "min_num_clusters must be an integer of at least 1."
   }
 }
@@ -34,10 +33,9 @@ variable "min_num_clusters" {
 variable "max_num_clusters" {
   description = "Maximum number of clusters the warehouse scales to."
   type        = number
-  nullable    = false
 
   validation {
-    condition     = try(var.max_num_clusters >= 1 && floor(var.max_num_clusters) == var.max_num_clusters, false)
+    condition     = var.max_num_clusters == null ? true : try(var.max_num_clusters >= 1 && floor(var.max_num_clusters) == var.max_num_clusters, false)
     error_message = "max_num_clusters must be an integer of at least 1."
   }
 }
@@ -45,10 +43,9 @@ variable "max_num_clusters" {
 variable "auto_stop_mins" {
   description = "Minutes of inactivity before the warehouse stops. 0 disables auto stop."
   type        = number
-  nullable    = false
 
   validation {
-    condition     = try(var.auto_stop_mins >= 0 && floor(var.auto_stop_mins) == var.auto_stop_mins, false)
+    condition     = var.auto_stop_mins == null ? true : try(var.auto_stop_mins >= 0 && floor(var.auto_stop_mins) == var.auto_stop_mins, false)
     error_message = "auto_stop_mins must be an integer of at least 0."
   }
 }
@@ -56,10 +53,9 @@ variable "auto_stop_mins" {
 variable "warehouse_type" {
   description = "Warehouse type: CLASSIC or PRO."
   type        = string
-  nullable    = false
 
   validation {
-    condition     = contains(["CLASSIC", "PRO"], var.warehouse_type)
+    condition     = var.warehouse_type == null ? true : contains(["CLASSIC", "PRO"], var.warehouse_type)
     error_message = "warehouse_type must be CLASSIC or PRO."
   }
 }
@@ -67,13 +63,11 @@ variable "warehouse_type" {
 variable "enable_photon" {
   description = "Run queries on the Photon engine."
   type        = bool
-  nullable    = false
 }
 
 variable "enable_serverless_compute" {
   description = "Run the warehouse on serverless compute."
   type        = bool
-  nullable    = false
 }
 
 variable "spot_instance_policy" {
