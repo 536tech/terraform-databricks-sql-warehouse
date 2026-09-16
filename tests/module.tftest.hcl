@@ -47,3 +47,59 @@ run "without_access" {
     error_message = "Empty access must omit the access resources."
   }
 }
+
+run "reject_blank_name" {
+  command = plan
+  variables {
+    name = "  "
+  }
+  expect_failures = [var.name]
+}
+
+run "reject_missing_principal" {
+  command = plan
+  variables {
+    permissions = [{ permission_level = "CAN_USE" }]
+  }
+  expect_failures = [var.permissions]
+}
+
+run "reject_multiple_principals" {
+  command = plan
+  variables {
+    permissions = [{ permission_level = "CAN_USE", user_name = "user@example.com", group_name = "readers" }]
+  }
+  expect_failures = [var.permissions]
+}
+
+run "reject_blank_principal" {
+  command = plan
+  variables {
+    permissions = [{ permission_level = "CAN_USE", group_name = " " }]
+  }
+  expect_failures = [var.permissions]
+}
+
+run "reject_invalid_permission" {
+  command = plan
+  variables {
+    permissions = [{ permission_level = "INVALID", group_name = "readers" }]
+  }
+  expect_failures = [var.permissions]
+}
+
+run "reject_reversed_cluster_limits" {
+  command = plan
+  variables {
+    min_num_clusters = 4
+  }
+  expect_failures = [databricks_sql_endpoint.this]
+}
+
+run "reject_group_owner" {
+  command = plan
+  variables {
+    permissions = [{ permission_level = "IS_OWNER", group_name = "readers" }]
+  }
+  expect_failures = [var.permissions]
+}
